@@ -1,8 +1,9 @@
 const std = @import("std");
 
-const tictactoe = @import("tictactoe.zig");
+const Tictactoe = @import("Tictactoe.zig");
+const Point = Tictactoe.Point;
 
-fn handleInput(game: *tictactoe.Tictactoe, input: []const u8) void {
+fn handleInput(game: *Tictactoe, input: []const u8) void {
     const trimmed = std.mem.trim(u8, input, "\x0a ");
 
     const help_message =
@@ -35,7 +36,7 @@ fn handleInput(game: *tictactoe.Tictactoe, input: []const u8) void {
     std.debug.print("\n\n", .{});
 }
 
-fn printBoard(game: tictactoe.Tictactoe) void {
+fn printBoard(game: Tictactoe) void {
     std.debug.print("     a   b   c\n", .{});
 
     var i: u8 = 0;
@@ -54,7 +55,7 @@ fn printBoard(game: tictactoe.Tictactoe) void {
     std.debug.print("     a   b   c\n", .{});
 }
 
-fn pointToChar(point: tictactoe.Point) u8 {
+fn pointToChar(point: Point) u8 {
     return switch (point) {
         .empty => ' ',
         .cross => 'X',
@@ -67,7 +68,7 @@ pub fn main() !void {
 
     var buffer: [std.mem.page_size]u8 = undefined;
 
-    var game = tictactoe.Tictactoe{};
+    var game = Tictactoe{};
     while (!game.over) {
         std.debug.print("{c}'s turn: ", .{pointToChar(game.player)});
         const len = try stdin.read(&buffer);
