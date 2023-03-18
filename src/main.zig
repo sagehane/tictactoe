@@ -28,7 +28,7 @@ fn handleInput(game: *tictactoe.Tictactoe, input: []const u8) void {
             if (x > 2 or y > 2)
                 std.debug.print("\nInvalid coordinates!\n", .{})
             else if (!game.play(.{ .x = x, .y = y }))
-                std.debug.print("\nIllegal play!\n", .{});
+                std.debug.print("\nThe coordinate is already occupied!\n", .{});
         } else std.debug.print("Invalid command, type \"help\" for a list of commands", .{});
     }
 
