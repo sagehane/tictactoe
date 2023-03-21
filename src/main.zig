@@ -22,11 +22,12 @@ fn handleInput(game: *Tictactoe, input: []const u8) void {
     } else if (std.mem.eql(u8, trimmed, "forfeit")) {
         game.forfeit(game.player);
     } else {
-        if (trimmed.len == 7 and std.mem.eql(u8, trimmed[0..5], "play ")) {
-            const x = trimmed[5] -% 'a';
-            const y = '3' -% trimmed[6];
+        if (std.mem.startsWith(u8, trimmed, "play ")) {
+            const arg = std.mem.trim(u8, trimmed["play ".len..], " ");
+            const x = arg[0] -% 'a';
+            const y = '3' -% arg[1];
 
-            if (x > 2 or y > 2)
+            if (arg.len != 2 or x > 2 or y > 2)
                 std.debug.print("\nInvalid coordinates!\n", .{})
             else if (!game.play(.{ .x = x, .y = y }))
                 std.debug.print("\nThe coordinate is already occupied!\n", .{});
