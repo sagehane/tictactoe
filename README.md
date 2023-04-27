@@ -2,7 +2,7 @@
 ### Usage:
 
 Get the [latest copy of Zig](https://ziglang.org/download/) and run `zig build run`.
-The Zig version is `0.11.0-dev.2154+2089b3f19` as of this writing.
+The minimum supported Zig version is specified in the `build.zig` file.
 
 ### Current progress:
 - [x] 1: Make a CLI, single-player Tictactoe program
