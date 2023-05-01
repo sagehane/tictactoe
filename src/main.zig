@@ -3,7 +3,7 @@ const std = @import("std");
 const Tictactoe = @import("Tictactoe.zig");
 const Point = Tictactoe.Point;
 
-fn handleInput(game: *Tictactoe, input: []const u8) void {
+fn handleInput(game: *Tictactoe, input: []const u8, writer: anytype) !void {
     const trimmed = std.mem.trim(u8, input, "\x0a ");
 
     const help_message =
@@ -15,10 +15,10 @@ fn handleInput(game: *Tictactoe, input: []const u8) void {
     ;
 
     if (std.mem.eql(u8, trimmed, "help")) {
-        std.debug.print(help_message, .{});
+        try writer.print(help_message, .{});
     } else if (std.mem.eql(u8, trimmed, "print")) {
-        std.debug.print("\n\n", .{});
-        printBoard(game.*);
+        try writer.print("\n\n", .{});
+        try printBoard(game.*, writer);
     } else if (std.mem.eql(u8, trimmed, "forfeit")) {
         game.forfeit(game.player);
     } else {
@@ -28,32 +28,33 @@ fn handleInput(game: *Tictactoe, input: []const u8) void {
             const y = '3' -% arg[1];
 
             if (arg.len != 2 or x > 2 or y > 2)
-                std.debug.print("\nInvalid coordinates!\n", .{})
+                try writer.print("\nInvalid coordinates!\n", .{})
             else if (!game.play(.{ .x = x, .y = y }))
-                std.debug.print("\nThe coordinate is already occupied!\n", .{});
-        } else std.debug.print("Invalid command, type \"help\" for a list of commands", .{});
+                try writer.print("\nThe coordinate is already occupied!\n", .{});
+        } else try writer.print("Invalid command, type \"help\" for a list of commands", .{});
     }
 
-    std.debug.print("\n\n", .{});
+    try writer.print("\n\n", .{});
 }
 
-fn printBoard(game: Tictactoe) void {
-    std.debug.print("     a   b   c\n", .{});
+fn printBoard(game: Tictactoe, writer: anytype) !void {
+    try writer.print("     a   b   c\n", .{});
 
-    var i: u8 = 0;
-    while (i < 3) : (i += 1) {
-        std.debug.print("   {s}-\n", .{"----" ** 3});
+    for (0..3) |i| {
+        const c = '3' - @intCast(u8, i);
 
-        std.debug.print(" {c} ", .{'3' - i});
+        try writer.print("   {s}-\n", .{"----" ** 3});
+
+        try writer.print(" {c} ", .{c});
         for (game.board[3 * i .. 3 * i + 3]) |point| {
-            std.debug.print("| {c} ", .{pointToChar(point)});
+            try writer.print("| {c} ", .{pointToChar(point)});
         }
 
-        std.debug.print("| {c}\n", .{'3' - i});
+        try writer.print("| {c}\n", .{c});
     }
 
-    std.debug.print("   {s}-\n", .{"----" ** 3});
-    std.debug.print("     a   b   c\n", .{});
+    try writer.print("   {s}-\n", .{"----" ** 3});
+    try writer.print("     a   b   c\n", .{});
 }
 
 fn pointToChar(point: Point) u8 {
@@ -66,6 +67,7 @@ fn pointToChar(point: Point) u8 {
 
 pub fn main() !void {
     const stdin = std.io.getStdIn().reader();
+    const stderr = std.io.getStdErr().writer();
 
     var buffer: [std.mem.page_size]u8 = undefined;
 
@@ -74,9 +76,9 @@ pub fn main() !void {
         std.debug.print("{c}'s turn: ", .{pointToChar(game.player)});
         const len = try stdin.read(&buffer);
 
-        handleInput(&game, buffer[0..len]);
+        try handleInput(&game, buffer[0..len], stderr);
     }
 
-    printBoard(game);
+    try printBoard(game, stderr);
     std.debug.print("\n\n{c} won the game!\n", .{pointToChar(game.player)});
 }
